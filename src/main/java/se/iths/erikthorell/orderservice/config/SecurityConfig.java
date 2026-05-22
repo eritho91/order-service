@@ -19,7 +19,11 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**"
+                        ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/orders").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated()
                 )
@@ -41,7 +45,7 @@ public class SecurityConfig {
             }
 
             return roles.stream()
-                    .<GrantedAuthority>map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                    .<GrantedAuthority>map(SimpleGrantedAuthority::new)
                     .toList();
         });
 
