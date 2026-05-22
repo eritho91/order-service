@@ -3,6 +3,7 @@ package se.iths.erikthorell.orderservice.dto;
 import java.math.BigDecimal;
 
 //Varje orderrad i svaret
+//Visar vad kunden köpte och vad raden kostar totalt
 public record OrderItemResponse(
         Long productId,
         String name,
