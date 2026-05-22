@@ -1,6 +1,7 @@
 package se.iths.erikthorell.orderservice.client;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ import se.iths.erikthorell.orderservice.dto.ProductStockRequest;
 
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ProductClient {
@@ -32,12 +34,24 @@ public class ProductClient {
                     });
 
         } catch (RestClientResponseException exception) {
+            log.error(
+                    "Fel från product-service. Status: {}, body: {}",
+                    exception.getStatusCode(),
+                    exception.getResponseBodyAsString(),
+                    exception
+            );
+
             throw new ResponseStatusException(
                     exception.getStatusCode(),
                     "Fel från product-service: " + exception.getResponseBodyAsString()
             );
 
         } catch (Exception exception) {
+            log.error(
+                    "Order-service kunde inte kontakta product-service",
+                    exception
+            );
+
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "Order-service kunde inte kontakta product-service"
