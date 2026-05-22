@@ -12,7 +12,7 @@ import java.util.List;
 //          {
 //          "name": "T-shirt",
 //          "price": 199,
-//          "quantity": 2,
+//          "stock": 2,
 //          "lineTotal": 398
 //          }
 //        ],

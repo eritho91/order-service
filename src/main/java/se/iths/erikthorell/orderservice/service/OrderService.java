@@ -1,6 +1,7 @@
 package se.iths.erikthorell.orderservice.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import se.iths.erikthorell.orderservice.client.ProductClient;
 import se.iths.erikthorell.orderservice.dto.*;
@@ -14,6 +15,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
@@ -27,6 +29,8 @@ public class OrderService {
             String customerName,
             String bearerToken
     ) {
+        log.info("Skapar order för kund: {}", customerName);
+
         List<ProductStockRequest> stockRequests = request.items().stream()
                 .map(item -> new ProductStockRequest(
                         item.productId(),
@@ -34,10 +38,14 @@ public class OrderService {
                 ))
                 .toList();
 
+        log.info("Anropar product-service för att minska stock");
+
         List<ProductInfoResponse> products = productClient.decreaseStock(
                 stockRequests,
                 bearerToken
         );
+
+        log.info("Svar mottaget från product-service: {} produkter", products.size());
 
         CustomerOrder order = new CustomerOrder();
         order.setOrderDate(LocalDateTime.now());
@@ -45,28 +53,39 @@ public class OrderService {
 
         BigDecimal totalPrice = BigDecimal.ZERO;
 
-        for (ProductInfoResponse product : products) {
+        for (int i = 0; i < products.size(); i++) {
+            ProductInfoResponse product = products.get(i);
+            int quantity = request.items().get(i).quantity();
+
             BigDecimal lineTotal = product.price()
-                    .multiply(BigDecimal.valueOf(product.quantity()));
+                    .multiply(BigDecimal.valueOf(quantity));
 
             OrderItem orderItem = new OrderItem();
-            orderItem.setProductId(product.productId());
+            orderItem.setProductId(product.id());
             orderItem.setName(product.name());
             orderItem.setPrice(product.price());
-            orderItem.setQuantity(product.quantity());
+            orderItem.setQuantity(quantity);
             orderItem.setLineTotal(lineTotal);
 
             order.addOrderItem(orderItem);
-
             totalPrice = totalPrice.add(lineTotal);
         }
 
         order.setTotalPrice(totalPrice);
 
+        log.info("Sparar order i databasen");
+
         CustomerOrder savedOrder = customerOrderRepository.save(order);
 
+        log.info("Order sparad med id: {}", savedOrder.getId());
+
         OrderConfirmationMessage message = toOrderConfirmationMessage(savedOrder);
+
+        log.info("Skickar orderbekräftelse till RabbitMQ");
+
         orderMessagePublisher.sendOrderConfirmation(message);
+
+        log.info("Orderbekräftelse skickad");
 
         return toResponse(savedOrder);
     }
