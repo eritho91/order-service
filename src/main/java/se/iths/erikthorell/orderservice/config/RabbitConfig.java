@@ -4,6 +4,8 @@ import org.springframework.amqp.core.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 
 @Configuration
 public class RabbitConfig {
@@ -32,5 +34,10 @@ public class RabbitConfig {
                 .bind(emailQueue)
                 .to(emailExchange)
                 .with(routingKey);
+    }
+
+    @Bean
+    public MessageConverter jsonMessageConverter() {
+        return new JacksonJsonMessageConverter();
     }
 }
