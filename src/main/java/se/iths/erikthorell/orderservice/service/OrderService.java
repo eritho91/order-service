@@ -15,22 +15,36 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+//Skapa automatiskt variabeln log
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
 
+    //Spara ordern i databasen
     private final CustomerOrderRepository customerOrderRepository;
+    //Skickar REST-anrop till product-service,
+    //som kontrollerar som minskar lagersaldot
     private final ProductClient productClient;
+    //Skickar orderbekräftelsen till RabbitMQ,
+    //så att email-service senare kan ta emot den
     private final OrderMessagePublisher orderMessagePublisher;
 
+    //När kunden beställer anropas den här metoden
+    //Den skapar ordern
     public OrderResponse createOrder(
+            //Innehåller id och antal
             CreateOrderRequest request,
+            //Kommer från JWT-token, t.ex. erik@gmail.com
             String customerName,
+            //Samma JWT-token som skickas vidare till product-service
             String bearerToken
     ) {
         log.info("Skapar order för kund: {}", customerName);
 
+        //Webshoppen skickar in orderrader
+        //Här gör vi om dem till det format som product-service behöver:
+        //Endast produkt-id och antal
         List<ProductStockRequest> stockRequests = request.items().stream()
                 .map(item -> new ProductStockRequest(
                         item.productId(),
