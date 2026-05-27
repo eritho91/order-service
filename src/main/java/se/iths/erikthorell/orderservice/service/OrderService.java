@@ -128,17 +128,17 @@ public class OrderService {
         List<OrderConfirmationMessage.OrderConfirmationItem> items = order.getOrderItems().stream()
                 .map(item -> new OrderConfirmationMessage.OrderConfirmationItem(
                         item.getName(),
-                        item.getPrice(),
                         item.getQuantity(),
-                        item.getLineTotal()
+                        item.getPrice()
                 ))
                 .toList();
 
         return new OrderConfirmationMessage(
-                order.getId(),
                 order.getCustomerName(),
+                order.getId(),
                 items,
-                order.getTotalPrice()
+                order.getTotalPrice(),
+                order.getOrderDate()
         );
     }
 }
