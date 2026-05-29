@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record OrderConfirmationMessage(
-        String customerEmail,
+        String customerName,
         Long id,
         List<OrderConfirmationItem> items,
         BigDecimal totalPrice,
