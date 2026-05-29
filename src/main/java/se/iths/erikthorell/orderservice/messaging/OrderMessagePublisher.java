@@ -18,7 +18,7 @@ public class OrderMessagePublisher {
     @Value("${app.rabbitmq.email-routing-key}")
     private String routingKey;
 
-    public void sendOrderConfirmation(OrderConfirmationMessage message) {
+    public void sendOrderConfirmation(OrderConfirmationDto message) {
         rabbitTemplate.convertAndSend(exchange, routingKey, message);
     }
 }
