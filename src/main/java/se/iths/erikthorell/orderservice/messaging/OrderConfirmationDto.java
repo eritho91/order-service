@@ -4,17 +4,20 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record OrderConfirmationMessage(
+public record OrderConfirmationDto(
         String customerName,
         Long id,
-        List<OrderConfirmationItem> items,
+        List<OrderItemDto> items,
+        BigDecimal lineTotal,
         BigDecimal totalPrice,
         LocalDateTime orderDate
 ) {
-    public record OrderConfirmationItem(
-            String productName,
+    public record OrderItemDto(
+            Long productId,
+            String name,
+            BigDecimal price,
             int quantity,
-            BigDecimal price
+            BigDecimal lineTotal
     ) {
     }
 }
