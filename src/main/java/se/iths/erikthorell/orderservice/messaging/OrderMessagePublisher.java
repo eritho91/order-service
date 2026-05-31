@@ -5,7 +5,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-//Här skickas orderbekräftelse till email-service
 @Component
 @RequiredArgsConstructor
 public class OrderMessagePublisher {
