@@ -4,8 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-//Svaret från order-service till frontend/Swagger
-//"Kvittot"
 public record OrderResponse(
         Long id,
         LocalDateTime orderDate,
