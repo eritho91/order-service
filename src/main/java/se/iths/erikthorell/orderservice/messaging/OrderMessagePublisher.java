@@ -11,13 +11,10 @@ public class OrderMessagePublisher {
 
     private final RabbitTemplate rabbitTemplate;
 
-    @Value("${app.rabbitmq.email-exchange}")
-    private String exchange;
-
-    @Value("${app.rabbitmq.email-routing-key}")
-    private String routingKey;
+    @Value("${app.rabbitmq.email-queue}")
+    private String queueName;
 
     public void sendOrderConfirmation(OrderConfirmationDto message) {
-        rabbitTemplate.convertAndSend(exchange, routingKey, message);
+        rabbitTemplate.convertAndSend(queueName, message);
     }
 }

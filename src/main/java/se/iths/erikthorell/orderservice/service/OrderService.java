@@ -5,12 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import se.iths.erikthorell.orderservice.client.ProductClient;
 import se.iths.erikthorell.orderservice.dto.CreateOrderRequest;
-import se.iths.erikthorell.orderservice.dto.OrderItemResponse;
 import se.iths.erikthorell.orderservice.dto.OrderResponse;
 import se.iths.erikthorell.orderservice.dto.ProductInfoResponse;
 import se.iths.erikthorell.orderservice.dto.ProductStockRequest;
 import se.iths.erikthorell.orderservice.entity.CustomerOrder;
 import se.iths.erikthorell.orderservice.entity.OrderItem;
+import se.iths.erikthorell.orderservice.mapper.OrderMapper;
 import se.iths.erikthorell.orderservice.messaging.OrderConfirmationDto;
 import se.iths.erikthorell.orderservice.messaging.OrderMessagePublisher;
 import se.iths.erikthorell.orderservice.repository.CustomerOrderRepository;
@@ -27,6 +27,7 @@ public class OrderService {
     private final CustomerOrderRepository customerOrderRepository;
     private final ProductClient productClient;
     private final OrderMessagePublisher orderMessagePublisher;
+    private final OrderMapper orderMapper;
 
     public OrderResponse createOrder(
             CreateOrderRequest request,
@@ -35,12 +36,8 @@ public class OrderService {
     ) {
         log.info("Skapar order för kund: {}", customerName);
 
-        List<ProductStockRequest> stockRequests = request.items().stream()
-                .map(item -> new ProductStockRequest(
-                        item.productId(),
-                        item.quantity()
-                ))
-                .toList();
+        List<ProductStockRequest> stockRequests =
+                orderMapper.toProductStockRequests(request.items());
 
         log.info("Anropar product-service för att minska stock");
 
@@ -84,7 +81,7 @@ public class OrderService {
 
         log.info("Order sparad med id: {}", savedOrder.getId());
 
-        OrderConfirmationDto message = toOrderConfirmationDto(savedOrder);
+        OrderConfirmationDto message = orderMapper.toOrderConfirmationDto(savedOrder);
 
         log.info("Skickar orderbekräftelse till RabbitMQ");
 
@@ -92,47 +89,6 @@ public class OrderService {
 
         log.info("Orderbekräftelse skickad");
 
-        return toResponse(savedOrder);
-    }
-
-    private OrderResponse toResponse(CustomerOrder order) {
-        List<OrderItemResponse> itemResponses = order.getOrderItems().stream()
-                .map(item -> new OrderItemResponse(
-                        item.getProductId(),
-                        item.getName(),
-                        item.getPrice(),
-                        item.getQuantity(),
-                        item.getLineTotal()
-                ))
-                .toList();
-
-        return new OrderResponse(
-                order.getId(),
-                order.getOrderDate(),
-                order.getCustomerName(),
-                itemResponses,
-                order.getTotalPrice()
-        );
-    }
-
-    private OrderConfirmationDto toOrderConfirmationDto(CustomerOrder order) {
-        List<OrderConfirmationDto.OrderItemDto> items = order.getOrderItems().stream()
-                .map(item -> new OrderConfirmationDto.OrderItemDto(
-                        item.getProductId(),
-                        item.getName(),
-                        item.getPrice(),
-                        item.getQuantity(),
-                        item.getLineTotal()
-                ))
-                .toList();
-
-        return new OrderConfirmationDto(
-                order.getCustomerName(),
-                order.getId(),
-                items,
-                order.getTotalPrice(),
-                order.getTotalPrice(),
-                order.getOrderDate()
-        );
+        return orderMapper.toResponse(savedOrder);
     }
 }

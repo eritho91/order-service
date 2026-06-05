@@ -7,9 +7,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 
+//Här skapas vägen orderbekräftelser tar till email-service
 @Configuration
 public class RabbitConfig {
 
+    //Sorteringsterminal
     @Bean
     public DirectExchange emailExchange(
             @Value("${app.rabbitmq.email-exchange}") String exchangeName
@@ -17,6 +19,7 @@ public class RabbitConfig {
         return new DirectExchange(exchangeName);
     }
 
+    //Här skapas kön där meddelandet hamnar
     @Bean
     public Queue emailQueue(
             @Value("${app.rabbitmq.email-queue}") String queueName
@@ -24,6 +27,7 @@ public class RabbitConfig {
         return new Queue(queueName, true);
     }
 
+    //Här kopplas sorteringen ihop med kön
     @Bean
     public Binding emailBinding(
             Queue emailQueue,
