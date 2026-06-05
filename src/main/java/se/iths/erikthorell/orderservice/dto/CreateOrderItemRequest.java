@@ -3,7 +3,6 @@ package se.iths.erikthorell.orderservice.dto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
-//En rad i kundens order
 public record CreateOrderItemRequest(
         @NotNull(message = "Produkt-id måste anges")
         Long productId,
