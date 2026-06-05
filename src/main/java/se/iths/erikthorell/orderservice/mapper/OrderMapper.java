@@ -15,6 +15,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface OrderMapper {
 
+    @Mapping(target = "id", source = "productId")
     ProductStockRequest toProductStockRequest(CreateOrderItemRequest item);
 
     List<ProductStockRequest> toProductStockRequests(List<CreateOrderItemRequest> items);
