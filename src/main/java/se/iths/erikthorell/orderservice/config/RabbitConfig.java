@@ -10,11 +10,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitConfig {
 
+    public static final String QUEUE = "email.queue";
+
     @Bean
-    public Queue emailQueue(
-            @Value("${app.rabbitmq.email-queue}") String queueName
-    ) {
-        return new Queue(queueName, true);
+    public Queue emailQueue() {
+        return new Queue(QUEUE);
     }
 
     @Bean
